@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparing Topological Roadmaps for Indoor Mobile Robot Navigation Among Pedestrians</title>
+<meta name="description" content="Four ways of building a roadmap for A* search, tested with two local controllers in ROS 2 Nav2, show where a guide robot meets pedestrians and what each global path request costs.">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,200;0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<section id="banner">
+  <div class="logos"><img src="static/images/logo-telu.png" alt=""><span>Telkom University Surabaya</span></div>
+  <video playsinline autoplay muted loop poster="static/images/teaser.jpg"><source src="static/videos/teaser.mp4" type="video/mp4"></video>
+  <div class="inner">
+    <h2 class="short"><span>DBL-GNG &middot; GNG &middot; PRM &middot; Voronoi</span></h2>
+    <h2 class="long">Comparing Topological Roadmaps for Indoor Mobile Robot Navigation Among Pedestrians</h2>
+    <p class="byline"><span>Fajar Hidayatullah</span>, &nbsp;<span>Mohamad Yani</span>, &nbsp;<span>Moch. Iskandar Riansyah</span>, &nbsp;<span>Naoyuki Kubota</span>, &nbsp;<span>Bharata Kukuh Hariyanto</span>, &nbsp;<span>Muhammad Rio Fernanda</span></p>
+    <div class="button-row">
+      <span class="button off" title="Not yet available"><i class="fa-solid fa-file-pdf"></i> Paper (soon)</span>
+      <a class="button" href="#code"><i class="fa-brands fa-github"></i> Code</a>
+      <a class="button" href="#publication"><i class="fa-solid fa-book"></i> BibTeX</a>
+    </div>
+  </div>
+</section>
+
+<div class="band"><div class="inner">
+  <div class="short-abstract">Four ways of building a roadmap for A* search, tested with two local controllers in ROS 2 Nav2, show where a guide robot meets pedestrians and what each global path request costs.</div>
+  <div class="wide"><video playsinline autoplay muted loop controls preload="auto" poster="static/images/poster.jpg"><source src="static/videos/presentation.mp4" type="video/mp4">Your browser cannot play this video.</video></div>
+</div></div>
+
+<div id="abstract" class="band grey"><div class="inner"><p class="wide">An indoor mobile robot can reach its destination even when its route brings it into close contact with
+pedestrians. To ask how much the global roadmap matters once a local controller avoids obstacles, we compared four ways
+to construct a graph of traversable space for A* search in ROS 2 Nav2: distributed batch learning of growing neural gas
+(DBL-GNG), growing neural gas (GNG), probabilistic roadmaps (PRM), and Voronoi roadmaps. A*, the behavior tree, and the
+pedestrian exclusion rule were held fixed. Each roadmap was paired with two local controllers (MPPI and TEB) on a
+simulated campus lobby route, with and without eight scripted pedestrians. All 80 simulation runs reached the goal. In
+the static scene, mean travel times differed by at most 0.2 s across roadmaps for each controller. In the dynamic scene,
+DBL-GNG and GNG generally followed the northern side of the hall and recorded no threshold-defined contacts across their
+20 trials. Voronoi routes generally turned toward the corridor earlier and recorded contacts in four of five trials with
+each controller. Voronoi also had the lowest median static planning latency (6.2 ms). All four roadmaps completed a
+campus corridor run with MPPI, with one hardware trial per roadmap. These observations identify a route-dependent
+trade-off between planning latency and pedestrian separation under the tested settings. They come from one route with
+non-reactive pedestrians and do not estimate contact rates with real people.</p></div></div>
+
+<div id="approach" class="band"><div class="inner">
+  <div class="title"><h2>Technical Approach</h2></div>
+  <div class="figure"><a href="static/images/fig1.png"><img src="static/images/fig1.png" alt="Navigation pipeline: the robot uses ROS 2 Humble and Nav2. A 2D LiDAR supplies scans for human detection and costmap updates; the physical robot localizes with AMCL, while simulation uses Gazebo ground truth. Clusters of LiDAR returns provide pedestrian positions for a Gaussian social-cost layer. A roadmap node (DBL-GNG, GNG, PRM, or Voronoi) serves global path requests, searches the graph with A*, assigns edge costs from the costmap, cuts edges within 0.55 m of detected people, applies shortcut smoothing, and resamples the path at 0.05 m intervals. MPPI or TEB then drives the robot."></a><div class="caption">Navigation pipeline: the robot uses ROS 2 Humble and Nav2. A 2D LiDAR supplies scans for human detection and costmap updates; the physical robot localizes with AMCL, while simulation uses Gazebo ground truth. Clusters of LiDAR returns provide pedestrian positions for a Gaussian social-cost layer. A roadmap node (DBL-GNG, GNG, PRM, or Voronoi) serves global path requests, searches the graph with A*, assigns edge costs from the costmap, cuts edges within 0.55 m of detected people, applies shortcut smoothing, and resamples the path at 0.05 m intervals. MPPI or TEB then drives the robot.</div></div>
+  <div class="figure"><a href="static/images/fig2.png"><img src="static/images/fig2.png" alt="DBL-GNG roadmap reconstruction and pedestrian-aware search, illustrated on the simulated lobby map: (a) free-space samples, (b) starting prototypes and their displacement after the first batch update, (c) base roadmap after 60 epochs, (d)-(f) the A* route changes as a pedestrian enters and leaves the 0.55 m exclusion zone. This is an illustrative run with schematic pedestrian positions."></a><div class="caption">DBL-GNG roadmap reconstruction and pedestrian-aware search, illustrated on the simulated lobby map: (a) free-space samples, (b) starting prototypes and their displacement after the first batch update, (c) base roadmap after 60 epochs, (d)-(f) the A* route changes as a pedestrian enters and leaves the 0.55 m exclusion zone. This is an illustrative run with schematic pedestrian positions.</div></div>
+</div></div>
+
+<div id="code" class="band"><div class="inner"><div class="title"><h2>Code</h2></div>
+  <p>The release contains the ROS 2 Humble packages for the four roadmap planners (DBL-GNG, GNG, PRM, Voronoi) with A*, the real-robot navigation package, the social costmap layer, and the Gazebo lobby and analysis scripts. It is released under the MIT License; third-party components keep their own licenses.</p>
+  <ul class="code-list">
+    <li><code>dbl_gng_planner</code>, <code>gng_graph_exp</code>, <code>prm_graph_exp</code>, <code>voronoi_graph_exp</code>: global planners</li>
+    <li><code>guide_robot_nav</code>: launch files, Nav2 parameters, map, robot model, LiDAR human detector, Arduino firmware</li>
+    <li><code>dunia_lobby</code> and <code>src</code>: simulation world, trial scripts, and analysis</li>
+  </ul>
+  <p>The repository link will appear here.</p>
+</div></div>
+
+<div id="publication" class="band grey"><div class="inner"><div class="title"><h2>Publications</h2></div>
+  <p>If you find our work useful, please consider citing our paper:</p>
+  <div class="cite wide"><p>Fajar Hidayatullah, Mohamad Yani, Moch. Iskandar Riansyah, Naoyuki Kubota, Bharata Kukuh Hariyanto, and Muhammad Rio Fernanda<br>Comparing Topological Roadmaps for Indoor Mobile Robot Navigation Among Pedestrians<br><em>Manuscript</em>, 2026.<br>
+    (<a href="#publication" onclick="var b=document.getElementById('bib');b.hidden=!b.hidden;return false">BibTeX</a>)</p>
+    <pre id="bib" hidden>@unpublished{roadmaps2026,
+  title  = {Comparing Topological Roadmaps for Indoor Mobile Robot Navigation Among Pedestrians},
+  author = {Hidayatullah, Fajar and Yani, Mohamad and Riansyah, Moch. Iskandar and Kubota, Naoyuki and Hariyanto, Bharata Kukuh and Fernanda, Muhammad Rio},
+  year   = {2026},
+  note   = {Manuscript}
+}</pre></div>
+</div></div>
+
+<div id="authors" class="band"><div class="inner"><div class="title"><h2>Authors</h2></div><div class="author"><h3>Fajar Hidayatullah</h3><p>Telkom University</p></div><div class="author"><h3>Mohamad Yani</h3><p>Telkom University</p></div><div class="author"><h3>Moch. Iskandar Riansyah</h3><p>Telkom University</p></div><div class="author"><h3>Naoyuki Kubota</h3><p>Tokyo Metropolitan University</p></div><div class="author"><h3>Bharata Kukuh Hariyanto</h3><p>Telkom University</p></div><div class="author"><h3>Muhammad Rio Fernanda</h3><p>Telkom University</p></div></div></div>
+
+<footer><p>Contact: <a href="mailto:fhidayat@student.telkomuniversity.ac.id">fhidayat@student.telkomuniversity.ac.id</a><br>&copy; The authors, 2026. All rights reserved.</p></footer>
+</body>
+</html>
